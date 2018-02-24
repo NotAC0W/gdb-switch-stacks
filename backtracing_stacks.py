@@ -1,4 +1,27 @@
 import gdb
+
+def get_reg_value(reg):
+    reg = gdb.execute("info registers %s" %(reg), to_string=True)
+    if reg:
+        reg = reg.splitlines()
+        if len(reg) > 1:
+            return None
+        else:
+            result = int(reg[0].split()[1],0)
+            return result
+    return reg
+
+def get_fn_address(fn):
+    fn = str(gdb.parse_and_eval(fn))
+    fn = fn[len("{<text variable, no debug info>} "):]
+    fn = fn.split(" ")[0]
+    return int(fn, 16)
+
+def get_var_address(var):
+    var = str(gdb.parse_and_eval(var))
+    var = var.split(" ")[0]
+    return int(var, 16)
+
 def backtrace_stack():
         i = 0
         frame = gdb.selected_frame()
@@ -29,20 +52,20 @@ class BacktrackingStacks(gdb.Command):
         backtrace_stack()
 
         print("Attempting to jump frame 'within' stack")
-        asmfoo = gdb.parse_and_eval("asmfoo")
-        rsp = gdb.parse_and_eval("$rsp")
+        asmfoo = get_fn_address("asmfoo")
+        rsp = get_reg_value("rsp")
         #that +40 is implicit knowledge 
-        cmd = "select-frame {} {}".format(hex(int(rsp)+40), hex(int(asmfoo.address)))
+        cmd = "select-frame {} {}".format(hex(int(rsp)+40), hex(asmfoo))
         gdb.execute(cmd)
         backtrace_stack()
 
         print("Attempting to jump frame 'outof' stack")
-        old_stack = gdb.parse_and_eval("old_stack")
-        switch_stack = gdb.parse_and_eval("switch_stack")
-        print("Old Stack: {} PC Address {}".format(old_stack, switch_stack.address))
+        old_stack = get_var_address("old_stack")
+        switch_stack = get_fn_address("switch_stack")
+        print("Old Stack: {} PC Address {}".format(hex(old_stack), hex(switch_stack)))
         old_frame_address = hex(int(old_stack) + 64)
         print("Frameline is +64: {}".format(old_frame_address))
-        cmd = "select-frame {} {}".format(old_frame_address, hex(int(switch_stack.address)))
+        cmd = "select-frame {} {}".format(old_frame_address, hex(int(switch_stack)))
         print("Switching Stacks: {}".format(cmd))
         gdb.execute(cmd)
 

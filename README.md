@@ -51,3 +51,51 @@ stack which fails.
 
 Setting a break point on main.c:26 and inspecting the stack pointer shows that it is identical to the address determined 
 by the script.
+
+
+### Example run
+
+With GNU 8.1
+
+```
+$ gdb ./jumping_stacks 
+Reading symbols from ./jumping_stacks...done.
+(gdb) source backtracing_stacks.py 
+(gdb) b main.c:26
+Breakpoint 1 at 0x6ff: file main.c, line 26.
+(gdb) r
+Starting program: /home/user/gdb/jumping_stacks 
+Switching Stack
+
+Breakpoint 1, setup () at main.c:26
+26		switch_stack(&old_stack, bottom-64); 
+(gdb) print $rsp
+$1 = (void *) 0x7fffffffe1c0
+(gdb) c
+Continuing.
+Hello Ding Dong
+
+Program received signal SIGSEGV, Segmentation fault.
+asmfoo2 () at functions.S:14
+14		movq %r12, 0(%r12) #This is intentionally broken
+(gdb) bts
+Current Stack:
+#0 0x000055555555474a in None()+13 at functions.S:14
+#1 0x000055555555475c in None()+31 at functions.S:32
+#2 0x00005555555546a4 in new_world()+26 at main.c:15
+Stopped because pc = 0
+
+Attempting to jump frame 'within' stack
+#0 0x000055555555475c in None()+31 at functions.S:32
+#1 0x00005555555546a4 in new_world()+26 at main.c:15
+Stopped because pc = 0
+
+Attempting to jump frame 'outof' stack
+Old Stack: 0x7fffffffe180 PC Address 0x55555555475f
+Frameline is +64: 0x7fffffffe1c0
+Switching Stacks: select-frame 0x7fffffffe1c0 0x55555555475f
+Old Stack:
+Python Exception <class 'gdb.error'> Frame is invalid.: 
+Error occurred in Python command: Frame is invalid.
+
+```
