@@ -57,7 +57,7 @@ by the script.
 
 With GNU 8.1
 
-```
+```GDB
 $ gdb ./jumping_stacks 
 Reading symbols from ./jumping_stacks...done.
 (gdb) source backtracing_stacks.py 
