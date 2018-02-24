@@ -15,7 +15,8 @@ stacks, but fails to do so.
 
 
 # Test case description
-The program jumping\_stacks calls setup() which allocates space for a new stack on the heap, prepares it and jumps to the new stack with a function to execute. This function calls two additional functions and then encounters a fabricated crash.
+The program jumping\_stacks calls setup() which allocates space for a new stack on the heap, prepares it and jumps to the new stack with a function to execute. This function calls a function that calls another and then encounters 
+a fabricated crash in this last function.
 
 Loading backtracing\_stacks.py into gdb adds the command 'bts' which prints the bt for both stacks invoked from the point
 of the fabricated crash.
@@ -27,7 +28,7 @@ of the fabricated crash.
 .. setup() calls create_stack(stack, new_world) which
 ... puts new_world on that stack as return address
 ... saves several register and EFLAGS on that stack
-..  setup() calls switch_stack()
+.. setup() calls switch_stack()
 ... saves registers and EFLAGS on current register
 ... changes sp to new stack
 ... recovers EFLAGS and registers
